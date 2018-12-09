@@ -80,51 +80,77 @@ def postRecentImage(storageLocation, InstagramAPI):
 
 #Initializing the usedImages array
 def init(idFilename):
-    #Creating an Instagram Object which we will use to post the picture
-    IGApi = InstagramAPI("", "")
-    #Logging in to Instagram with the credentials
-    IGApi.login()
+
+    #Gathering the username and password
+    if(not os.path.isfile("Credentials.txt")):
+        f = open("Credentials.txt", "w+")
+        f.close()
+        isAuthenticated = False
+    else:
+        f = open("Credentials.txt", "r")
+        credentials = f.read()
+        if(credentials == ""):
+            isAuthenticated = False
+        else:
+            credentials = credentials.split("\n")
+            username = credentials[0]
+            password = credentials[1]
+            isAuthenticated = True
+
+    if(isAuthenticated):
+        print(username + " : " + password)
+        #Creating an Instagram Object which we will use to post the picture
+        IGApi = InstagramAPI(username, password)
+        #Logging in to Instagram with the credentials
+        IGApi.login()
 
         
-    #If the USED_IMAGES_FILENAME is not there, create it
-    if(not os.path.isfile(USED_IMAGES_FILENAME)):
-        f = open(USED_IMAGES_FILENAME, "w+")
-        f.close()
+                
+        #If the USED_IMAGES_FILENAME is not there, create it
+        if(not os.path.isfile(USED_IMAGES_FILENAME)):
+            f = open(USED_IMAGES_FILENAME, "w+")
+            f.close()
 
-    #Open the file, grab the contents and parse it making an array of the images's we already used
-    f = open(USED_IMAGES_FILENAME, "r")
-    fileContents = f.read()
-    if(fileContents == ""):
-        UsedImages = []
+        #Open the file, grab the contents and parse it making an array of the images's we already used
+        f = open(USED_IMAGES_FILENAME, "r")
+        fileContents = f.read()
+        if(fileContents == ""):
+            UsedImages = []
+        else:
+            #Removing the last \n at the end of the string
+            fileContents = fileContents[0:len(fileContents)-1]
+            UsedImages = fileContents.split("\n")
+        f.close()
+        return isAuthenticated, UsedImages, IGApi
     else:
-        #Removing the last \n at the end of the string
-        fileContents = fileContents[0:len(fileContents)-1]
-        UsedImages = fileContents.split("\n")
-    f.close()
-    return UsedImages, IGApi
+        return isAuthenticated, None, None
 
 if(__name__ == "__main__"):
     PEXELS_URL = "https://www.pexels.com/search/sunset/"
     IMAGE_STORAGE_LOCATION = "/home/jeremy/Desktop/InstagramImages/"
     USED_IMAGES_FILENAME = "UsedImagesFile.txt"
-    
-    UsedImages, InstagramAPI = init(USED_IMAGES_FILENAME)
 
-    #Getting the raw HTML from the specified url
-    pexelsHTML = retrieveWebPageHTML(PEXELS_URL)
-    #Getting all the images from the HTML we previously queried for.
-    parsedHTMLImgs = parseHTML(pexelsHTML)
-    #Refining the Img URLS
-    parsedHTMLImgs = refineImageURLS(parsedHTMLImgs)
-    #Getting the most recent image
-    mostRecentImg = retrieveMostRecentImage(parsedHTMLImgs, UsedImages)
-    #Saving the most recent image
-    UsedImages = downloadImage(mostRecentImg, IMAGE_STORAGE_LOCATION, USED_IMAGES_FILENAME, UsedImages)
-    #Posting the most recent image and updating the UsedImages
-    postRecentImage(IMAGE_STORAGE_LOCATION, InstagramAPI)
-    mostRecentImage = ""
-    time.sleep(10)
-
+    isAuthenticated, UsedImages, InstagramAPI = init(USED_IMAGES_FILENAME)
+    if(not isAuthenticated):
+        print("PLEASE ENTER YOUR CREDENTIALS IN THE Credentials.txt FILE")
+    else:
+        print("Authorized User!")
+        
+        #Getting the raw HTML from the specified url
+        pexelsHTML = retrieveWebPageHTML(PEXELS_URL)
+        #Getting all the images from the HTML we previously queried for.
+        parsedHTMLImgs = parseHTML(pexelsHTML)
+        #Refining the Img URLS
+        parsedHTMLImgs = refineImageURLS(parsedHTMLImgs)
+        #Getting the most recent image
+        mostRecentImg = retrieveMostRecentImage(parsedHTMLImgs, UsedImages)
+        #Saving the most recent image
+        UsedImages = downloadImage(mostRecentImg, IMAGE_STORAGE_LOCATION, USED_IMAGES_FILENAME, UsedImages)
+        #Posting the most recent image and updating the UsedImages
+        postRecentImage(IMAGE_STORAGE_LOCATION, InstagramAPI)
+        mostRecentImage = ""
+        time.sleep(10)
+        
 
 
 
