@@ -55,6 +55,7 @@ def downloadImage(imgURL, storageLocation, usedFilesImage, usedImgs):
     output = open(storageLocation + "RecentImage." + extension,"wb")
     output.write(image.read())
     output.close()
+    time.sleep(20)
     return usedImgs
 
 def postRecentImage(storageLocation, InstagramAPI):
@@ -69,7 +70,8 @@ def postRecentImage(storageLocation, InstagramAPI):
 
     print(image)
     try:
-        caption = "Hope you are enjoying your evening!"
+        caption = "'The strange thing about the sunset is that we actually don't want the sun to set, we want it to stay right on the horizon, not below it, not above it, just right on it!' - Mehmet Murat ildan"
+        caption = caption + "\n#sunset #sunsetlovers #sunsets #nature #sky #ig #photooftheday #picoftheday #sunrise #sunrisephotography #greatlandscapes_oftheworld #landscapelovers #sunset_captures #landscape_capture #sunsetlover #landscapephotography #landscapelover #bestplaces #landscape_collection #sunsetphotography #landscape_specialist #sunset_stream #sunsetchaser"
         InstagramAPI.uploadPhoto(image, caption=caption)
         time.sleep(60)
         os.remove(image)
@@ -127,7 +129,7 @@ def init(idFilename):
 
 if(__name__ == "__main__"):
     PEXELS_URL = "https://www.pexels.com/search/sunset/"
-    IMAGE_STORAGE_LOCATION = "/home/jeremy/Desktop/InstagramImages/"
+    IMAGE_STORAGE_LOCATION = "/home/jeremy/Desktop/InstagramUserScript/"
     USED_IMAGES_FILENAME = "UsedImagesFile.txt"
 
     isAuthenticated, UsedImages, InstagramAPI = init(USED_IMAGES_FILENAME)
